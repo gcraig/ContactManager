@@ -1,5 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+void Registration();
+void SortContacts();
+void Delete();
+void FindByBirth();
+void ShowAll();
+void Exit();
+int DisplayMenu();
 
 // Contact Data
 struct Contact_s {
@@ -16,15 +25,15 @@ struct Contact_s TempContact[100];
 
 // Current Contact in Structure
 // -1 means initial empty data set
-int idx=-1;
+int ndx=-1;
 
 void Registration()
 {
-    idx++;
+    ndx++;
         
-    if (idx > 99) {
+    if (ndx > 99) {
        printf("OVERFLOW\n");
-       idx--;
+       ndx--;
        return;    
     }
     
@@ -33,50 +42,54 @@ void Registration()
     char bd[9];
     
     printf("Name:");
-    scanf("%s", &n);
+    scanf("%s", &n[0]);
     
     // Check to see if there is a duplicate Contact Name
-    // Return
-    for (int i=0; i<(idx+1); i++) 
+    // If so, Return
+    for (int i=0; i<(ndx+1); i++) 
     {
         if (strcmp(n, Contact[i].Name) == 0)
         {
-            idx--;
+            ndx--;
             return;
         }
     }
     
     printf("Phone_number:");
-    scanf("%s", &pn);
+    scanf("%s", &pn[0]);
     printf("Birth:");
-    scanf("%s", &bd);
+    scanf("%s", &bd[0]);
     
-    strcpy(Contact[idx].Name, n);
-    strcpy(Contact[idx].PhoneNumber, pn);
-    strcpy(Contact[idx].Birthdate, bd);
+    // Add new Contact
+    strcpy(Contact[ndx].Name, n);
+    strcpy(Contact[ndx].PhoneNumber, pn);
+    strcpy(Contact[ndx].Birthdate, bd);
     
-    //TODO: sort the contact structure
-    
-    //Print total contacts in program
-    printf("<<%d>>\n", idx + 1);
+    // Arrange Contact structure
+    SortContacts();
+        
+    // Print total Contacts in program
+    printf("<<%d>>\n", ndx + 1);
 }
 
 void Delete()
 {
-    if (idx < 0) 
+    // Print none early if no data
+    if (ndx < 0) 
     {
        printf("NO MEMBER\n"); 
        return;
     }
     
+    // Remove deleted Contact
     char n[21];
     printf("Name:");
-    scanf("%s", &n);
+    scanf("%s", &n[0]);
     int found=0;
-    int idxc = idx; // keep original idx count
+    int ndxc = ndx; // keep original ndx count
     
     //TODO: find member and remove
-    for (int i=0; i<(idxc+1); i++) 
+    for (int i=0; i<(ndxc+1); i++) 
     {
         if (strcmp(n, Contact[i].Name) == 0)
         {
@@ -84,14 +97,14 @@ void Delete()
             
             // remove entry -- buggy
             /*
-            for (int j=i; j<idxc; j++)
+            for (int j=i; j<ndxc; j++)
             {
                 Contact[j].Name = Contact[j+1].Name;
                 Contact[j].PhoneNumber = Contact[j+1].PhoneNumber;
                 Contact[j].Birthdate = Contact[j+1].Birthdate;
             }
             */
-            idx--;
+            ndx--;
         }
     }
     
@@ -109,13 +122,13 @@ void FindByBirth()
     scanf("%d", &searchMonth);
         
     // Print out Contacts with matching birthdates
-    for (int i=0; i<(idx+1); i++) 
+    for (int i=0; i<(ndx+1); i++) 
     {
         // Obtain Contact birth month
         m[0] = Contact[i].Birthdate[4];
         m[1] = Contact[i].Birthdate[5];
         m[2] = '\0';
-        int month = atoi(m);
+        month = atoi(m);
         
         // Compare against searched month
         if (month == searchMonth)
@@ -130,12 +143,12 @@ void FindByBirth()
 
 void ShowAll()
 {
-    if (idx < 0)
+    if (ndx < 0)
     {
        return;
     }
        
-    for (int i=0; i<(idx+1); i++) 
+    for (int i=0; i<(ndx+1); i++) 
     {
          printf("%s %s %s\n", 
            Contact[i].Name, 
@@ -144,49 +157,34 @@ void ShowAll()
     }
 }
 
-/*
 void SortContacts()
 {
-    for (int i=0; i==idx; i++) 
-    {
-        // ? 
-        if (i == idx) {
-            // blank last entry
-            // fix ndx
-            goto Sorted;
-        }
-        
-        if (strcmp(Contact[i].Name, Contact[i+1].Name) > 0)
-        {
-            strcpy(TempContact[i].Name, Contact[i+1].Name);
-            strcpy(TempContact[i].PhoneNumber, Contact[i+1].PhoneNumber);
-            strcpy(TempContact[i].Birthdate, Contact[i+1].Birthdate);
-            
-        } else
-        if (strcmp(Contact[i].Name, Contact[i+1].Name) < 0)
-        {
-            strcpy(TempContact[i].Name, Contact[i].Name);
-            strcpy(TempContact[i].PhoneNumber, Contact[i].PhoneNumber);
-            strcpy(TempContact[i].Birthdate, Contact[i].Birthdate);
-            
-        } else
-        if (strcmp(Contact[i].Name, Contact[i+1].Name) == 0)
-        {
-            strcpy(TempContact[i].Name, Contact[i].Name);
-            strcpy(TempContact[i].PhoneNumber, Contact[i].PhoneNumber);
-            strcpy(TempContact[i].Birthdate, Contact[i].Birthdate);
-        }
+    // No need to sort only 1 entry
+    if (ndx < 1) {
+        return;
     }
 
-Sorted:    
-           for (int i=0; i<(idx+1); i++) 
-           {
-               strcpy(Contact[i].Name, TempContact[i].Name);
-               strcpy(Contact[i].PhoneNumber, TempContact[i].PhoneNumber);
-               strcpy(Contact[i].Birthdate, TempContact[i].Birthdate);
-           }
+    int n = ndx+1;
+    int i, j;
+    char temp[21];
+    //used to show entered and sorted names; debug only
+    //char sortedName[21][n], enteredName[21][n];
+
+    for (i = 0; i < n - 1 ; i++)
+    {
+        for (j = i + 1; j < n; j++)
+        {
+            // Classic bubble like sort
+            // Inner loop j is to sort names after the current one
+            if (strcmp(Contact[i].Name, Contact[j].Name) > 0) 
+            {
+                strcpy(temp, Contact[i].Name);
+                strcpy(Contact[i].Name, Contact[j].Name);
+                strcpy(Contact[j].Name, temp);
+            }
+        }
+    }    
 }
-*/
 
 int DisplayMenu() 
 {
