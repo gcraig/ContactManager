@@ -184,6 +184,7 @@ void SortContacts()
     int i, j;
     
     // Temporary scratch space for Name, Phone number, and Birthdate
+    // TODO: consistent naming to match other functions
     char temp[21], temp2[16], temp3[9];
     
     // Following used to show entered and sorted names; debug only
